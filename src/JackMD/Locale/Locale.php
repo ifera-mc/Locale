@@ -68,6 +68,14 @@ class Locale implements Listener{
 	private static $players = [];
 
 	/**
+	 * Instead of registering multiple handlers if the user isn't using a compiled version then register the handler
+	 * first and continue.
+	 *
+	 * @var bool
+	 */
+	private static $handlerRegistered = false;
+
+	/**
 	 * Locale constructor.
 	 *
 	 * Yea.. You construct using init.
@@ -120,7 +128,10 @@ class Locale implements Listener{
 			throw new ConfigException("$fallbackIdentifier does not exist in the langFiles.");
 		}
 
-		$plugin->getServer()->getPluginManager()->registerEvents(new self(), $plugin);
+		if(!self::$handlerRegistered){
+			self::$handlerRegistered = true;
+			$plugin->getServer()->getPluginManager()->registerEvents(new self(), $plugin);
+		}
 	}
 
 	/**
