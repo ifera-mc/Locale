@@ -4,7 +4,7 @@ A simple yet powerful virion for PocketMine-MP plugins to send translated messag
 
 ## Important Note(s)
 
-- Make sure the language file you are making is supported. (yaml, json, txt, etc). `.ini` isn't supported.
+- Make sure the language file you are making is supported. (yaml, json, txt, ini, etc).
 - `identifier` key should exist in all the language files you make. It should be set as `en_US` or `en_GB` or whatever. The list of required ones is in the Locale::ALLOWED_IDENTIFIERS.
 - At least one of the language files should have a `fallbackIdentifier` that would be used in case players locale doesn't exist.
 - Language present in `resources\lang` dir will be saved automatically to `plugin_data` path if `$saveFilesToPath` is true.
