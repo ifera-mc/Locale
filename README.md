@@ -1,14 +1,14 @@
 # Locale
 
-A simple yet powerful virion for PocketMine-MP plugins to send translated messages to players using their preferred languages.
+A simple yet powerful virion for PocketMine-MP plugins to send translated messages to players using their locale.
 
 ## Important Note(s)
 
-- Make sure the language file you are making is supported. (yaml, json, txt, etc). .ini isn't supported.
+- Make sure the language file you are making is supported. (yaml, json, txt, etc). `.ini` isn't supported.
 - `identifier` key should exist in all the language files you make. It should be set as `en_US` or `en_GB` or whatever. The list of required ones is in the Locale::ALLOWED_IDENTIFIERS.
-- At least one of the language files should have a fallbackIdentifier that would be used in case the player language doesn't exist.
+- At least one of the language files should have a `fallbackIdentifier` that would be used in case players locale doesn't exist.
 - Language files should exist in `plugin_data/your plugin name/lang/` directory.
-- The virion will auto load all the valid language files in the lang directory.
+- The virion will auto load all the valid language files in the `lang` directory.
 
 ## Caution
 
@@ -19,7 +19,7 @@ Bundle this virion into the plugin before using in production.
 Initialize the virion by doing<br />
 
 ```php
-    Locale::init(Plugin $plugin, string $fallbackIdentifier = "en_US");
+Locale::init(Plugin $plugin, string $fallbackIdentifier = "en_US");
 ```
 
 - `$plugin` is pretty self explanatory.
@@ -28,7 +28,7 @@ Initialize the virion by doing<br />
 ## Get Translated Message
 
 ```php
-    Locale::getTranslation(string $langIdentifier, string $messageIdentifier, array $toFind = [], array $toReplace = []): string;
+Locale::getTranslation(string $langIdentifier, string $messageIdentifier, array $toFind = [], array $toReplace = []): string;
 ```
 
 - `$langIdentifier` will either be `en_US` or one of the allowed identifiers.
@@ -41,7 +41,7 @@ Initialize the virion by doing<br />
 Automatically send the translated message based on the players locale. If the translation file exists then it is used else the fallback translation is used.
 
 ```php
-    Locale::sendTranslatedMessage(CommandSender $sender, string $messageIdentifier, array $toFind = [], array $toReplace = []): void;
+Locale::sendTranslatedMessage(CommandSender $sender, string $messageIdentifier, array $toFind = [], array $toReplace = []): void;
 ```
 
 - `$sender` the player or console user.
@@ -50,5 +50,5 @@ Automatically send the translated message based on the players locale. If the tr
 ### Additional Note(s)
 
 - Hopefully I mentioned every required detail.
-- For any feature additions or bug reports to open an issue.
+- For any feature additions or bug reports please open an issue.
 - PRs are always welcomed.
