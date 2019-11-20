@@ -42,12 +42,9 @@ class Locale implements Listener{
 	 * @var array
 	 */
 	private const ALLOWED_IDENTIFIERS = [
-		"en_US", "en_GB", "de_DE", "es_ES", "es_MX", "fr_FR", "fr_CA", "it_IT", "ja_JP", "ko_KR", "pt_BR", "pt_PT", "ru_RU", "zh_CN", "zh_TW", "nl_NL", "bg_BG", "cs_CZ", "da_DK",
-		"el_GR", "fi_FI", "hu_HU", "id_ID", "nb_NO", "pl_PL", "sk_SK", "sv_SE", "tr_TR", "uk_UA"
+		"en_US", "en_GB", "de_DE", "es_ES", "es_MX", "fr_FR", "fr_CA", "it_IT", "ja_JP", "ko_KR", "pt_BR", "pt_PT", "ru_RU", "zh_CN", "zh_TW",
+		"nl_NL", "bg_BG", "cs_CZ", "da_DK", "el_GR", "fi_FI", "hu_HU", "id_ID", "nb_NO", "pl_PL", "sk_SK", "sv_SE", "tr_TR", "uk_UA"
 	];
-
-	/** @var Plugin */
-	private static $plugin;
 
 	/** @var string */
 	private static $fallbackIdentifier = "en_US";
@@ -64,7 +61,7 @@ class Locale implements Listener{
 	private static $translations = [];
 
 	/**
-	 * An array consisting of players lowercase name => land_id
+	 * An array consisting of players lowercase name => lang_id
 	 *
 	 * @var array
 	 */
@@ -87,8 +84,6 @@ class Locale implements Listener{
 	 * @param string $fallbackIdentifier - The identifier which is to be used for fallback language for player. Default to en_US.
 	 */
 	public static function init(Plugin $plugin, string $fallbackIdentifier = "en_US"): void{
-		self::$plugin = $plugin;
-
 		if(!in_array($fallbackIdentifier, self::ALLOWED_IDENTIFIERS)){
 			throw new InvalidLocaleIdentifierException("Locale $fallbackIdentifier is invalid.");
 		}
