@@ -26,7 +26,7 @@ use const DIRECTORY_SEPARATOR;
 
 class Locale implements Listener{
 
-	/*
+	/**
 	 * NOTE:
 	 *
 	 * BUNDLE THIS VIRION INTO THE PLUGIN WHEN USED IN PRODUCTION.
