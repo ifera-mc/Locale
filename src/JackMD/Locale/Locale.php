@@ -32,10 +32,6 @@ namespace JackMD\Locale;
 use JackMD\Locale\Exceptions\ConfigException;
 use JackMD\Locale\Exceptions\InvalidLocaleIdentifierException;
 use pocketmine\command\CommandSender;
-use pocketmine\event\Listener;
-use pocketmine\event\player\PlayerQuitEvent;
-use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\utils\Config;
@@ -46,10 +42,9 @@ use function is_dir;
 use function mkdir;
 use function scandir;
 use function str_replace;
-use function strtolower;
 use const DIRECTORY_SEPARATOR;
 
-class Locale implements Listener{
+class Locale{
 
 	/**
 	 * NOTE:
@@ -113,21 +108,6 @@ class Locale implements Listener{
 	private static $translations = [];
 
 	/**
-	 * An array consisting of players lowercase name => lang_id
-	 *
-	 * @var array
-	 */
-	private static $players = [];
-
-	/**
-	 * Instead of registering multiple handlers if the user isn't using a compiled version then register the handler
-	 * first and continue.
-	 *
-	 * @var bool
-	 */
-	private static $handlerRegistered = false;
-
-	/**
 	 * Locale constructor.
 	 *
 	 * Yea.. You construct using init.
@@ -179,11 +159,6 @@ class Locale implements Listener{
 		if(!isset(self::$translations[$fallbackIdentifier])){
 			throw new ConfigException("$fallbackIdentifier does not exist in the langFiles.");
 		}
-
-		if(!self::$handlerRegistered){
-			self::$handlerRegistered = true;
-			$plugin->getServer()->getPluginManager()->registerEvents(new self(), $plugin);
-		}
 	}
 
 	/**
@@ -231,7 +206,7 @@ class Locale implements Listener{
 	 * @param array         $toReplace
 	 */
 	public static function sendTranslatedMessage(CommandSender $sender, string $messageIdentifier, array $toFind = [], array $toReplace = []): void{
-		$sender->sendMessage(self::getTranslation(self::getPlayerLocale($sender), $messageIdentifier, $toFind, $toReplace));
+		$sender->sendMessage(self::getTranslation(self::getLocale($sender), $messageIdentifier, $toFind, $toReplace));
 	}
 
 	/**
@@ -239,44 +214,8 @@ class Locale implements Listener{
 	 *
 	 * @param CommandSender $sender
 	 * @return string
-	 * @internal
 	 */
-	private static function getPlayerLocale(CommandSender $sender): string{
-		$langIdentifier = self::$fallbackIdentifier;
-
-		if($sender instanceof Player){
-			$playerName = strtolower($sender->getName());
-
-			return self::$players[$playerName] ?? $langIdentifier;
-		}
-
-		return $langIdentifier;
-	}
-
-
-	# LISTENER STUFF IN HERE
-
-	/**
-	 * @param DataPacketReceiveEvent $event
-	 */
-	public function onDataPacketReceive(DataPacketReceiveEvent $event){
-		$packet = $event->getPacket();
-
-		if($packet instanceof LoginPacket){
-			$playerName = strtolower($packet->username);
-
-			if($playerName === ""){
-				return;
-			}
-
-			self::$players[$playerName] = $packet->locale;
-		}
-	}
-
-	/**
-	 * @param PlayerQuitEvent $event
-	 */
-	public function onQuit(PlayerQuitEvent $event){
-		unset(self::$players[strtolower($event->getPlayer()->getName())]);
+	private static function getLocale(CommandSender $sender): string{
+		return ($sender instanceof Player) ? $sender->getLocale() : self::$fallbackIdentifier;
 	}
 }
