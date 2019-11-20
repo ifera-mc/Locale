@@ -52,7 +52,7 @@ class Locale implements Listener{
 	/**
 	 * Format: [
 	 *      lang_id => [
-	 *          translations
+	 *          message_id => translation
 	 *      ]
 	 * ]
 	 *
