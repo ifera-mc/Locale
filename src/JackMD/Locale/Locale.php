@@ -16,7 +16,6 @@ use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use function array_diff;
 use function array_merge;
-use function in_array;
 use function is_dir;
 use function mkdir;
 use function scandir;
@@ -41,9 +40,36 @@ class Locale implements Listener{
 	 *
 	 * @var array
 	 */
-	private const ALLOWED_IDENTIFIERS = [
-		"en_US", "en_GB", "de_DE", "es_ES", "es_MX", "fr_FR", "fr_CA", "it_IT", "ja_JP", "ko_KR", "pt_BR", "pt_PT", "ru_RU", "zh_CN", "zh_TW",
-		"nl_NL", "bg_BG", "cs_CZ", "da_DK", "el_GR", "fi_FI", "hu_HU", "id_ID", "nb_NO", "pl_PL", "sk_SK", "sv_SE", "tr_TR", "uk_UA"
+	public const ALLOWED_IDENTIFIERS = [
+		"en_US" => "English (US)",
+		"en_GB" => "English (UK)",
+		"de_DE" => "Deutsch (Deutschland)",
+		"es_ES" => "Español (España)",
+		"es_MX" => "Español (México)",
+		"fr_FR" => "Français (France)",
+		"fr_CA" => "Français (Canada)",
+		"it_IT" => "Italiano (Italia)",
+		"ja_JP" => "日本語 (日本)",
+		"ko_KR" => "한국어 (대한민국)",
+		"pt_BR" => "Português (Brasil)",
+		"pt_PT" => "Português (Portugal)",
+		"ru_RU" => "Русский (Россия)",
+		"zh_CN" => "简体中文 (中国)",
+		"zh_TW" => "繁體中文 (台灣)",
+		"nl_NL" => "Nederlands (Nederland)",
+		"bg_BG" => "Български (BG)",
+		"cs_CZ" => "Čeština (Česká republika)",
+		"da_DK" => "Dansk (DA)",
+		"el_GR" => "Ελληνικά (Ελλάδα)",
+		"fi_FI" => "Suomi (Suomi)",
+		"hu_HU" => "Magyar (HU)",
+		"id_ID" => "Bahasa Indonesia (Indonesia)",
+		"nb_NO" => "Norsk bokmål (Norge)",
+		"pl_PL" => "Polski (PL)",
+		"sk_SK" => "Slovensky (SK)",
+		"sv_SE" => "Svenska (Sverige)",
+		"tr_TR" => "Türkçe (Türkiye)",
+		"uk_UA" => "Українська (Україна)"
 	];
 
 	/** @var string */
@@ -92,7 +118,7 @@ class Locale implements Listener{
 	 * @param string $fallbackIdentifier - The identifier which is to be used for fallback language for player. Default to en_US.
 	 */
 	public static function init(Plugin $plugin, string $fallbackIdentifier = "en_US"): void{
-		if(!in_array($fallbackIdentifier, self::ALLOWED_IDENTIFIERS)){
+		if(!isset(self::ALLOWED_IDENTIFIERS[$fallbackIdentifier])){
 			throw new InvalidLocaleIdentifierException("Locale $fallbackIdentifier is invalid.");
 		}
 
@@ -118,7 +144,7 @@ class Locale implements Listener{
 			$data = $config->getAll();
 
 			if(!isset($data["identifier"])){
-				throw new ConfigException("identifier key does not exist in " . $path . $langFile);
+				throw new ConfigException("identifier key does not exist in $langPath.");
 			}
 
 			self::loadTranslations((string) $data["identifier"], $data);
