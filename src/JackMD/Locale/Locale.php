@@ -31,14 +31,14 @@ namespace JackMD\Locale;
 
 use JackMD\Locale\Exceptions\ConfigException;
 use JackMD\Locale\Exceptions\InvalidLocaleIdentifierException;
+use JackMD\Locale\Utils\LocaleUtils;
 use pocketmine\command\CommandSender;
 use pocketmine\Player;
-use pocketmine\plugin\Plugin;
+use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use function array_diff;
 use function array_merge;
-use function is_dir;
 use function mkdir;
 use function scandir;
 use function str_replace;
@@ -120,20 +120,35 @@ class Locale{
 	/**
 	 * This will load all the **valid** lang config files in the lang folder in plugins data path.
 	 *
-	 * @param Plugin $plugin
-	 * @param string $fallbackIdentifier - The identifier which is to be used for fallback language for player. Default to en_US.
+	 * @param PluginBase $plugin
+	 * @param string     $fallbackIdentifier - The identifier which is to be used for fallback language for player. Default to en_US.
+	 * @param bool       $saveFilesToPath - Save the lang files to the plugin data folder?
+	 *
+	 * @throws InvalidLocaleIdentifierException
+	 * @throws \ReflectionException
 	 */
-	public static function init(Plugin $plugin, string $fallbackIdentifier = "en_US"): void{
+	public static function init(PluginBase $plugin, string $fallbackIdentifier = "en_US", bool $saveFilesToPath = true): void{
 		if(!isset(self::ALLOWED_IDENTIFIERS[$fallbackIdentifier])){
 			throw new InvalidLocaleIdentifierException("Locale $fallbackIdentifier is invalid.");
 		}
 
+		if(!isset(Config::$formats["ini"])){
+			Config::$formats["ini"] = Config::YAML;
+		}
+
 		self::$fallbackIdentifier = $fallbackIdentifier;
 
-		$path = $plugin->getDataFolder() . "lang";
+		$pluginFilePath = LocaleUtils::getFile($plugin) . "resources" . DIRECTORY_SEPARATOR . "lang";
 
-		if(!is_dir($path)){
-			mkdir($path);
+		if($saveFilesToPath){
+			$path = $plugin->getDataFolder() . "lang";
+			@mkdir($path);
+
+			foreach(array_diff(scandir($pluginFilePath), ["..", "."]) as $langFile){
+				$plugin->saveResource("lang" . DIRECTORY_SEPARATOR . $langFile);
+			}
+		}else{
+			$path = $pluginFilePath;
 		}
 
 		foreach(array_diff(scandir($path), ["..", "."]) as $langFile){
@@ -153,7 +168,19 @@ class Locale{
 				throw new ConfigException("identifier key does not exist in $langPath.");
 			}
 
-			self::loadTranslations((string) $data["identifier"], $data);
+			$identifier = (string) $data["identifier"];
+
+			if(!isset(self::ALLOWED_IDENTIFIERS[$identifier])){
+				$plugin->getLogger()->debug("$langFile with identifier: $identifier, is not supported.");
+
+				continue;
+			}
+
+			self::loadTranslations($identifier, $data);
+		}
+
+		if(!$saveFilesToPath){
+			LocaleUtils::deleteTree($plugin->getDataFolder() . "lang");
 		}
 
 		if(!isset(self::$translations[$fallbackIdentifier])){
@@ -190,9 +217,11 @@ class Locale{
 	 */
 	public static function getTranslation(string $langIdentifier, string $messageIdentifier, array $toFind = [], array $toReplace = []): string{
 		$translated = self::$translations[$langIdentifier][$messageIdentifier] ?? (self::$translations[self::$fallbackIdentifier][$messageIdentifier] ?? $messageIdentifier);
+		$translated = TextFormat::colorize($translated, "&");
 
-		$translated = str_replace("&", TextFormat::ESCAPE, $translated);
-		$translated = str_replace($toFind, $toReplace, $translated);
+		if(!empty($toFind) && !empty($toReplace)){
+			$translated = str_replace($toFind, $toReplace, $translated);
+		}
 
 		return $translated;
 	}

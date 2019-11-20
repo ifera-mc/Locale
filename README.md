@@ -7,8 +7,9 @@ A simple yet powerful virion for PocketMine-MP plugins to send translated messag
 - Make sure the language file you are making is supported. (yaml, json, txt, etc). `.ini` isn't supported.
 - `identifier` key should exist in all the language files you make. It should be set as `en_US` or `en_GB` or whatever. The list of required ones is in the Locale::ALLOWED_IDENTIFIERS.
 - At least one of the language files should have a `fallbackIdentifier` that would be used in case players locale doesn't exist.
-- Language files should exist in `plugin_data/your plugin name/lang/` directory.
-- The virion will auto load all the valid language files in the `lang` directory.
+- Language present in `resources\lang` dir will be saved automatically to `plugin_data` path if `$saveFilesToPath` is true.
+- The virion will auto load all the valid language files in the `lang` directory and save or use them.
+- Added feature to use `&` in translations for color codes.
 
 ## Caution
 
@@ -19,11 +20,12 @@ Bundle this virion into the plugin before using in production.
 Initialize the virion by doing<br />
 
 ```php
-Locale::init(Plugin $plugin, string $fallbackIdentifier = "en_US");
+Locale::init(PluginBase $plugin, string $fallbackIdentifier = "en_US", bool $saveFilesToPath = true): void;
 ```
 
 - `$plugin` is pretty self explanatory.
 - `$fallbackIdentifier` is the identifier that's used in case the players required translation is missing.
+- `$saveFilesToPath` either save files to plugin_data or load the from the source i.e. from plugins folder.
 
 ## Get Translated Message
 
