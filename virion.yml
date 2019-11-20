@@ -1,0 +1,6 @@
+name: Locale
+version: 1.0.0
+antigen: JackMD\Locale
+api: 3.0.0
+authors: [JackMD]
+description: A simple yet powerful language manager for your PocketMine plugins.
