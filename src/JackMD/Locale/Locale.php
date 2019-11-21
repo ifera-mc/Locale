@@ -56,44 +56,6 @@ class Locale{
 	 * YOU HAVE BEEN WARNED!
 	 */
 
-	/**
-	 * Accepted locales. Please PR in more if I forgot any.
-	 * Data retrieved from vanilla resource pack.
-	 *
-	 * @var array
-	 */
-	public const ALLOWED_IDENTIFIERS = [
-		"en_US" => "English (US)",
-		"en_GB" => "English (UK)",
-		"de_DE" => "Deutsch (Deutschland)",
-		"es_ES" => "Español (España)",
-		"es_MX" => "Español (México)",
-		"fr_FR" => "Français (France)",
-		"fr_CA" => "Français (Canada)",
-		"it_IT" => "Italiano (Italia)",
-		"ja_JP" => "日本語 (日本)",
-		"ko_KR" => "한국어 (대한민국)",
-		"pt_BR" => "Português (Brasil)",
-		"pt_PT" => "Português (Portugal)",
-		"ru_RU" => "Русский (Россия)",
-		"zh_CN" => "简体中文 (中国)",
-		"zh_TW" => "繁體中文 (台灣)",
-		"nl_NL" => "Nederlands (Nederland)",
-		"bg_BG" => "Български (BG)",
-		"cs_CZ" => "Čeština (Česká republika)",
-		"da_DK" => "Dansk (DA)",
-		"el_GR" => "Ελληνικά (Ελλάδα)",
-		"fi_FI" => "Suomi (Suomi)",
-		"hu_HU" => "Magyar (HU)",
-		"id_ID" => "Bahasa Indonesia (Indonesia)",
-		"nb_NO" => "Norsk bokmål (Norge)",
-		"pl_PL" => "Polski (PL)",
-		"sk_SK" => "Slovensky (SK)",
-		"sv_SE" => "Svenska (Sverige)",
-		"tr_TR" => "Türkçe (Türkiye)",
-		"uk_UA" => "Українська (Україна)"
-	];
-
 	/** @var string */
 	private static $fallbackIdentifier = "en_US";
 
@@ -127,7 +89,7 @@ class Locale{
 	 * @throws \ReflectionException
 	 */
 	public static function init(PluginBase $plugin, string $fallbackIdentifier = "en_US", bool $saveFilesToPath = true): void{
-		if(!isset(self::ALLOWED_IDENTIFIERS[$fallbackIdentifier])){
+		if(!isset(LocaleUtils::ALLOWED_IDENTIFIERS[$fallbackIdentifier])){
 			throw new InvalidLocaleIdentifierException("Locale $fallbackIdentifier is invalid.");
 		}
 
@@ -170,7 +132,7 @@ class Locale{
 
 			$identifier = (string) $data["identifier"];
 
-			if(!isset(self::ALLOWED_IDENTIFIERS[$identifier])){
+			if(!isset(LocaleUtils::ALLOWED_IDENTIFIERS[$identifier])){
 				$plugin->getLogger()->debug("$langFile with identifier: $identifier, is not supported.");
 
 				continue;
