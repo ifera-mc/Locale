@@ -39,6 +39,7 @@ use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use function array_diff;
 use function array_merge;
+use function is_dir;
 use function mkdir;
 use function scandir;
 use function str_replace;
@@ -110,8 +111,6 @@ class Locale{
 	/**
 	 * Locale constructor.
 	 *
-	 * Yea.. You construct using init.
-	 *
 	 * @see Locale::init()
 	 */
 	private function __construct(){
@@ -137,12 +136,14 @@ class Locale{
 		}
 
 		self::$fallbackIdentifier = $fallbackIdentifier;
-
 		$pluginFilePath = LocaleUtils::getFile($plugin) . "resources" . DIRECTORY_SEPARATOR . "lang";
 
 		if($saveFilesToPath){
 			$path = $plugin->getDataFolder() . "lang";
-			@mkdir($path);
+
+			if(!is_dir($path)){
+				mkdir($path);
+			}
 
 			foreach(array_diff(scandir($pluginFilePath), ["..", "."]) as $langFile){
 				$plugin->saveResource("lang" . DIRECTORY_SEPARATOR . $langFile);
@@ -153,7 +154,6 @@ class Locale{
 
 		foreach(array_diff(scandir($path), ["..", "."]) as $langFile){
 			$langPath = $path . DIRECTORY_SEPARATOR . $langFile;
-
 			$config = new Config($langPath, Config::DETECT, [], $loaded);
 
 			if(!$loaded){
