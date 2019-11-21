@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace JackMD\Locale\Utils;
 
+use JackMD\Locale\Locale;
+use pocketmine\command\CommandSender;
+use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use ReflectionProperty;
 use function file_exists;
@@ -88,5 +91,15 @@ class LocaleUtils{
 		}
 
 		return (!$keepRootFolder ? @rmdir($folder) : true);
+	}
+
+	/**
+	 * Returns the locale player has.
+	 *
+	 * @param CommandSender $sender
+	 * @return string
+	 */
+	public static function getLocale(CommandSender $sender): string{
+		return ($sender instanceof Player) ? $sender->getLocale() : Locale::$fallbackIdentifier;
 	}
 }

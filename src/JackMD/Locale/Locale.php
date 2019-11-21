@@ -33,7 +33,6 @@ use JackMD\Locale\Exceptions\ConfigException;
 use JackMD\Locale\Exceptions\InvalidLocaleIdentifierException;
 use JackMD\Locale\Utils\LocaleUtils;
 use pocketmine\command\CommandSender;
-use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
@@ -42,7 +41,7 @@ use function array_merge;
 use function is_dir;
 use function mkdir;
 use function scandir;
-use function str_replace;
+use function strtr;
 use const DIRECTORY_SEPARATOR;
 
 class Locale{
@@ -89,17 +88,22 @@ class Locale{
 	 * @throws \ReflectionException
 	 */
 	public static function init(PluginBase $plugin, string $fallbackIdentifier = "en_US", bool $saveFilesToPath = true): void{
+		// check if the $fallbackIdentifier is a valid one. we only want the ones shipped by mojang to load.
 		if(!isset(LocaleUtils::ALLOWED_IDENTIFIERS[$fallbackIdentifier])){
 			throw new InvalidLocaleIdentifierException("Locale $fallbackIdentifier is invalid.");
 		}
 
+		// simple fix for ini configs.
 		if(!isset(Config::$formats["ini"])){
 			Config::$formats["ini"] = Config::YAML;
 		}
 
 		self::$fallbackIdentifier = $fallbackIdentifier;
+
+		// get the path to the resources folder inside the plugins folder. not the plugin_data one.
 		$pluginFilePath = LocaleUtils::getFile($plugin) . "resources" . DIRECTORY_SEPARATOR . "lang";
 
+		// if files are to be saved then use the plugin_data path else use the plugins path.
 		if($saveFilesToPath){
 			$path = $plugin->getDataFolder() . "lang";
 
@@ -107,6 +111,7 @@ class Locale{
 				mkdir($path);
 			}
 
+			// save all the lang files inside the resources folder in plugins path.
 			foreach(array_diff(scandir($pluginFilePath), ["..", "."]) as $langFile){
 				$plugin->saveResource("lang" . DIRECTORY_SEPARATOR . $langFile);
 			}
@@ -114,10 +119,12 @@ class Locale{
 			$path = $pluginFilePath;
 		}
 
+		// try loading all the lang files
 		foreach(array_diff(scandir($path), ["..", "."]) as $langFile){
 			$langPath = $path . DIRECTORY_SEPARATOR . $langFile;
 			$config = new Config($langPath, Config::DETECT, [], $loaded);
 
+			// if the lang file could not be loaded then skip it.
 			if(!$loaded){
 				$plugin->getLogger()->debug("$langFile is not supported.");
 
@@ -132,15 +139,18 @@ class Locale{
 
 			$identifier = (string) $data["identifier"];
 
+			// identifier in the lang file should be one from the allowed identifiers.
 			if(!isset(LocaleUtils::ALLOWED_IDENTIFIERS[$identifier])){
 				$plugin->getLogger()->debug("$langFile with identifier: $identifier, is not supported.");
 
 				continue;
 			}
 
+			// everything seems ok. load the translations.
 			self::loadTranslations($identifier, $data);
 		}
 
+		// if the files are not to be saved from the plugins resource folder then remove the lang folder in plugin_data.
 		if(!$saveFilesToPath){
 			LocaleUtils::deleteTree($plugin->getDataFolder() . "lang");
 		}
@@ -173,16 +183,15 @@ class Locale{
 	 *
 	 * @param string $langIdentifier
 	 * @param string $messageIdentifier
-	 * @param array  $toFind
-	 * @param array  $toReplace
+	 * @param array  $args
 	 * @return string
 	 */
-	public static function getTranslation(string $langIdentifier, string $messageIdentifier, array $toFind = [], array $toReplace = []): string{
+	public static function getTranslation(string $langIdentifier, string $messageIdentifier, array $args = []): string{
 		$translated = self::$translations[$langIdentifier][$messageIdentifier] ?? (self::$translations[self::$fallbackIdentifier][$messageIdentifier] ?? $messageIdentifier);
 		$translated = TextFormat::colorize($translated, "&");
 
-		if(!empty($toFind) && !empty($toReplace)){
-			$translated = str_replace($toFind, $toReplace, $translated);
+		if(!empty($args)){
+			$translated = strtr($translated, $args);
 		}
 
 		return $translated;
@@ -193,20 +202,9 @@ class Locale{
 	 *
 	 * @param CommandSender $sender
 	 * @param string        $messageIdentifier
-	 * @param array         $toFind
-	 * @param array         $toReplace
+	 * @param array         $args
 	 */
-	public static function sendTranslatedMessage(CommandSender $sender, string $messageIdentifier, array $toFind = [], array $toReplace = []): void{
-		$sender->sendMessage(self::getTranslation(self::getLocale($sender), $messageIdentifier, $toFind, $toReplace));
-	}
-
-	/**
-	 * Returns the land_id player has. Retrieved from login packet.
-	 *
-	 * @param CommandSender $sender
-	 * @return string
-	 */
-	private static function getLocale(CommandSender $sender): string{
-		return ($sender instanceof Player) ? $sender->getLocale() : self::$fallbackIdentifier;
+	public static function sendTranslatedMessage(CommandSender $sender, string $messageIdentifier, array $args = []): void{
+		$sender->sendMessage(self::getTranslation(LocaleUtils::getLocale($sender), $messageIdentifier, $args));
 	}
 }

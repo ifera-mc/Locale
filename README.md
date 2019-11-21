@@ -1,6 +1,6 @@
 # Locale
 
-A simple yet powerful virion for PocketMine-MP plugins to send translated messages to players using their locale.
+A simple virion for PocketMine-MP plugins to send translated messages to players using their locale.
 
 ## Important Note(s)
 
@@ -30,13 +30,12 @@ Locale::init(PluginBase $plugin, string $fallbackIdentifier = "en_US", bool $sav
 ## Get Translated Message
 
 ```php
-Locale::getTranslation(string $langIdentifier, string $messageIdentifier, array $toFind = [], array $toReplace = []): string;
+Locale::getTranslation(string $langIdentifier, string $messageIdentifier, array $args = []): string;
 ```
 
 - `$langIdentifier` will either be `en_US` or one of the allowed identifiers.
 - `$messageIdentifier` the message key to translate.
-- `$toFind` array of placeholders in the string.
-- `$toReplace` array of placeholders to replace them with.
+- `$args` array of placeholders in the string. Example `["{player}" => "player name", "ip" => "players ip"]`
 
 ## Send Translated Message
 
