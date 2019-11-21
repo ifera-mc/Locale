@@ -42,7 +42,7 @@ Locale::getTranslation(string $langIdentifier, string $messageIdentifier, array 
 Automatically send the translated message based on the players locale. If the translation file exists then it is used else the fallback translation is used.
 
 ```php
-Locale::sendTranslatedMessage(CommandSender $sender, string $messageIdentifier, array $toFind = [], array $toReplace = []): void;
+Locale::sendTranslatedMessage(CommandSender $sender, string $messageIdentifier, array $args = []): void;
 ```
 
 - `$sender` the player or console user.
