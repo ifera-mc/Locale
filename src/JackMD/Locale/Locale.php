@@ -57,7 +57,7 @@ class Locale{
 	 */
 
 	/** @var string */
-	private static $fallbackIdentifier = "en_US";
+	public static $fallbackIdentifier = "en_US";
 
 	/**
 	 * Format: [
