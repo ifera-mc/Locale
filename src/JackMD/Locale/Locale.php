@@ -37,8 +37,8 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use function array_diff;
-use function array_merge;
 use function is_dir;
+use function is_null;
 use function mkdir;
 use function scandir;
 use function strtr;
@@ -60,12 +60,10 @@ class Locale{
 
 	/**
 	 * Format: [
-	 *      lang_id => [
-	 *          message_id => translation
-	 *      ]
+	 *      lang_id => Config
 	 * ]
 	 *
-	 * @var array
+	 * @var Config[]
 	 */
 	private static $translations = [];
 
@@ -131,13 +129,11 @@ class Locale{
 				continue;
 			}
 
-			$data = $config->getAll();
-
-			if(!isset($data["identifier"])){
+			if(!$config->exists("identifier")){
 				throw new ConfigException("identifier key does not exist in $langPath.");
 			}
 
-			$identifier = (string) $data["identifier"];
+			$identifier = (string) $config->get("identifier");
 
 			// identifier in the lang file should be one from the allowed identifiers.
 			if(!isset(LocaleUtils::ALLOWED_IDENTIFIERS[$identifier])){
@@ -147,7 +143,7 @@ class Locale{
 			}
 
 			// everything seems ok. load the translations.
-			self::loadTranslations($identifier, $data);
+			self::loadTranslations($identifier, $config);
 		}
 
 		// if the files are not to be saved from the plugins resource folder then remove the lang folder in plugin_data.
@@ -164,18 +160,10 @@ class Locale{
 	 * Loads all the translations provided.
 	 *
 	 * @param string $langIdentifier
-	 * @param array  $translations
+	 * @param Config $config
 	 */
-	private static function loadTranslations(string $langIdentifier, array $translations): void{
-		unset($translations[$langIdentifier]);
-
-		$current = self::$translations[$langIdentifier] ?? [];
-
-		if(empty($current)){
-			self::$translations[$langIdentifier] = $translations;
-		}else{
-			self::$translations[$langIdentifier] = array_merge($current, $translations);
-		}
+	private static function loadTranslations(string $langIdentifier, Config $config): void{
+		self::$translations[$langIdentifier] = $config;
 	}
 
 	/**
@@ -187,7 +175,13 @@ class Locale{
 	 * @return string
 	 */
 	public static function getTranslation(string $langIdentifier, string $messageIdentifier, array $args = []): string{
-		$translated = self::$translations[$langIdentifier][$messageIdentifier] ?? (self::$translations[self::$fallbackIdentifier][$messageIdentifier] ?? $messageIdentifier);
+		$config = self::$translations[$langIdentifier] ?? (self::$translations[self::$fallbackIdentifier] ?? null);
+
+		if(is_null($config)){
+			throw new ConfigException("Required lang id config and fallback config not found.");
+		}
+
+		$translated = $config->getNested($messageIdentifier, $messageIdentifier);
 		$translated = TextFormat::colorize($translated, "&");
 
 		if(!empty($args)){
