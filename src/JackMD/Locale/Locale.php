@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 /**
  * Locale
- * 
+ *
  * Locale, a virion for PocketMine-MP.
  * Copyright (c) 2019 JackMD  < https://github.com/JackMD/Locale >
  *
@@ -181,7 +181,12 @@ class Locale{
 			throw new ConfigException("Required lang id config and fallback config not found.");
 		}
 
-		$translated = $config->getNested($messageIdentifier, $messageIdentifier);
+		$translated = $config->getNested($messageIdentifier, null);
+
+		if(is_null($translated)){
+			$translated = (string) $config->get($messageIdentifier, $messageIdentifier);
+		}
+
 		$translated = TextFormat::colorize($translated, "&");
 
 		if(!empty($args)){
